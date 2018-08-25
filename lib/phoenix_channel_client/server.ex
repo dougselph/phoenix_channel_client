@@ -98,6 +98,11 @@ defmodule PhoenixChannelClient.Server do
     state.sender.handle_close({:closed, reason}, %{state | state: :closed})
   end
 
+  def handle_info({:trigger, "phx_close", reason, _ref}, %{state: :joined} = state) do
+    state.socket.channel_unlink(self(), state.topic)
+    state.sender.handle_close({:closed, reason}, state)
+  end
+
   def handle_info(
         {:trigger, "phx_reply", %{"status" => status} = payload, ref},
         %{join_push: %{ref: join_ref}} = state
